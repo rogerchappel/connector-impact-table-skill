@@ -4,7 +4,7 @@
   "description": "Prepare local impact tables for planned connector actions",
   "type": "module",
   "bin": {
-    "connector-impact-table-skill": "./dist/cli.js"
+    "connector-impact-table-skill": "./dist/src/cli.js"
   },
   "files": [
     "dist",
@@ -17,7 +17,7 @@
     "build": "tsc -p tsconfig.json",
     "check": "tsc --noEmit -p tsconfig.json",
     "test": "node --test dist/tests/*.test.js",
-    "smoke": "npm run build && node dist/cli.js --help && node dist/cli.js examples/sample.txt --format markdown",
+    "smoke": "npm run build && node dist/src/cli.js --help && node dist/src/cli.js examples/sample.txt --format markdown",
     "validate": "bash scripts/validate.sh"
   },
   "keywords": [
