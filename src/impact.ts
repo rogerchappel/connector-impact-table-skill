@@ -1,7 +1,7 @@
 import type { ConnectorAction, ImpactReport, ImpactRow, RiskLevel } from './types.js';
 
-const HIGH_WORDS = /(delete|remove|send|publish|merge|charge|invite|email|dm|message)/i;
-const MEDIUM_WORDS = /(create|update|comment|assign|schedule|label|post)/i;
+const HIGH_WORDS = /\b(delete|remove|send|publish|merge|charge|invite|email|dm|message)\b/i;
+const MEDIUM_WORDS = /\b(create|update|comment|assign|schedule|label|post)\b/i;
 
 export function scoreAction(action: ConnectorAction): ImpactRow {
   const missing = ['approval', 'rollback', 'dryRun'].filter((key) => {
