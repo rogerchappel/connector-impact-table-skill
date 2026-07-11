@@ -30,10 +30,9 @@ function parseJsonPlan(text: string): ConnectorAction[] {
 }
 
 function parseMarkdownPlan(source: string, text: string): ConnectorAction[] {
-  return text.split(/?
-/).map((line) => line.trim()).filter((line) => /^[-*]\s+/.test(line)).map((line, index) => {
+  return text.split(/\r?\n/).map((line) => line.trim()).filter((line) => /^[-*]\s+/.test(line)).map((line, index) => {
     const body = line.replace(/^[-*]\s+/, '');
-    const connector = body.match(/(slack|github|calendar|crm|notion|jira|linear)/i)?.[1] ?? 'unspecified';
+    const connector = body.match(new RegExp('\\\\b(slack|github|calendar|crm|notion|jira|linear)\\\\b', 'i'))?.[1] ?? 'unspecified';
     const target = body.match(/(?:to|in|on)\s+([^.;]+)/i)?.[1]?.trim() ?? source;
     return { id: `md-${index + 1}`, connector, action: body, target, sideEffect: body, approval: 'unspecified', rollback: 'unspecified', dryRun: 'unspecified' };
   });

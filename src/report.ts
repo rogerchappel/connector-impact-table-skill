@@ -1,8 +1,7 @@
 import type { ImpactReport, RiskLevel } from './types.js';
 
 export function toJson(report: ImpactReport): string {
-  return `${JSON.stringify(report, null, 2)}
-`;
+  return `${JSON.stringify(report, null, 2)}\n`;
 }
 
 export function toMarkdown(report: ImpactReport): string {
@@ -12,9 +11,7 @@ export function toMarkdown(report: ImpactReport): string {
   for (const row of report.rows) {
     lines.push(`| ${row.id} | ${row.connector} | ${row.action.replace(/\|/g, '/')} | ${row.target.replace(/\|/g, '/')} | ${row.risk} | ${row.missing.join(', ') || 'none'} |`);
   }
-  return `${lines.join('
-')}
-`;
+  return `${lines.join('\n')}\n`;
 }
 
 export function exceedsFailLevel(report: ImpactReport, failOn: RiskLevel): boolean {
