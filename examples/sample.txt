@@ -1,0 +1,2 @@
+- Post release candidate summary to Slack channel #ops after approval.
+- Create GitHub issue comment on rogerchappel/example with dry-run evidence.

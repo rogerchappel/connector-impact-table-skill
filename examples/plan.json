@@ -1,0 +1,24 @@
+{
+  "actions": [
+    {
+      "id": "slack-summary",
+      "connector": "slack",
+      "action": "post message",
+      "target": "#team-updates",
+      "sideEffect": "send public channel message",
+      "approval": "required from project owner",
+      "rollback": "delete message permalink if incorrect",
+      "dryRun": "render markdown preview"
+    },
+    {
+      "id": "github-label",
+      "connector": "github",
+      "action": "add label",
+      "target": "rogerchappel/example#12",
+      "sideEffect": "update issue metadata",
+      "approval": "unspecified",
+      "rollback": "remove label",
+      "dryRun": "gh issue view --json labels"
+    }
+  ]
+}
