@@ -13,6 +13,19 @@ node dist/src/cli.js examples/plan.json --format markdown
 
 `npm run release:check` runs type checks, builds the CLI, executes the compiled test suite, runs the fixture-backed CLI smoke, and verifies npm pack contents.
 
+## Verification
+
+Run the same checks used for release-readiness before publishing or opening a release PR:
+
+```bash
+npm run check
+npm test
+npm run build
+npm run smoke
+npm run release:check
+npm pack --dry-run
+```
+
 ## CLI
 
 ```bash
