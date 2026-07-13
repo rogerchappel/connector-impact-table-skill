@@ -8,7 +8,7 @@ agent touches external accounts.
 ```bash
 npm install
 npm run build
-node dist/cli.js examples/plan.json --format markdown
+node dist/src/cli.js examples/plan.json --format markdown
 ```
 
 ## CLI
