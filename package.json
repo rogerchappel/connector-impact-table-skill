@@ -9,6 +9,7 @@
   "files": [
     "dist",
     "README.md",
+    "CHANGELOG.md",
     "SKILL.md",
     "docs",
     "examples"
@@ -18,7 +19,9 @@
     "check": "tsc --noEmit -p tsconfig.json",
     "test": "node --test dist/tests/*.test.js",
     "smoke": "npm run build && node dist/src/cli.js --help && node dist/src/cli.js examples/sample.txt --format markdown",
-    "validate": "bash scripts/validate.sh"
+    "package:smoke": "node scripts/package-smoke.js",
+    "validate": "bash scripts/validate.sh",
+    "release:check": "npm run validate && npm run package:smoke"
   },
   "keywords": [
     "agent-skill",
@@ -27,6 +30,17 @@
     "fixtures"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerchappel/connector-impact-table-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rogerchappel/connector-impact-table-skill/issues"
+  },
+  "homepage": "https://github.com/rogerchappel/connector-impact-table-skill#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@types/node": "^26.1.1",
     "typescript": "^5.5.4"
