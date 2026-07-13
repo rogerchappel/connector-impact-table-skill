@@ -7,9 +7,11 @@ agent touches external accounts.
 
 ```bash
 npm install
-npm run build
+npm run release:check
 node dist/src/cli.js examples/plan.json --format markdown
 ```
+
+`npm run release:check` runs type checks, builds the CLI, executes the compiled test suite, runs the fixture-backed CLI smoke, and verifies npm pack contents.
 
 ## CLI
 
@@ -18,6 +20,10 @@ connector-impact-table-skill plan.json --format json
 connector-impact-table-skill plan.md --format markdown --out impact.md
 connector-impact-table-skill plan.json --fail-on high
 ```
+
+## Package Contents
+
+The npm package ships compiled CLI/source files, docs, examples, changelog, license, and the skill entrypoint. `npm run package:smoke` checks those contents after a build so the published package keeps the documented quickstart runnable.
 
 ## What It Reviews
 
