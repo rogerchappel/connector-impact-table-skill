@@ -33,8 +33,8 @@ try {
   if (!packageJson.repository?.url || !packageJson.bugs?.url || !packageJson.homepage) {
     throw new Error("package metadata must include repository, bugs, and homepage URLs");
   }
-  const files = packageJson.files ?? [];
-  const duplicateFiles = files.filter((file, index) => files.indexOf(file) !== index);
+  const allowlist = packageJson.files ?? [];
+  const duplicateFiles = allowlist.filter((file, index) => allowlist.indexOf(file) !== index);
   if (duplicateFiles.length > 0) {
     throw new Error(`package files allowlist has duplicates: ${duplicateFiles.join(", ")}`);
   }
