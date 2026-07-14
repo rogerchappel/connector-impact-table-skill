@@ -3,8 +3,6 @@
 ## [Unreleased]
 
 - Add release-readiness checks for package metadata, pack contents, and CI verification.
-## Unreleased
-
 - Added CI coverage for release-readiness checks.
 - Added npm package smoke coverage for compiled CLI, docs, and examples.
 - Corrected the README quickstart to use the built CLI path.
