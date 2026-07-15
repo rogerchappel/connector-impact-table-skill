@@ -57,3 +57,7 @@ review artifact before collecting approval for live connector actions.
 
 Risk scoring is intentionally conservative and keyword-based. It does not replace
 human approval or connector-level permission enforcement.
+
+## Release notes
+
+Before tagging a release, confirm the smoke fixture still represents the intended workflow and summarize any changed output, limitations, or operator steps in the PR.
