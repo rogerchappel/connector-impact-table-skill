@@ -15,7 +15,10 @@
     "SECURITY.md",
     "CONTRIBUTING.md",
     "docs",
-    "examples"
+    "examples",
+    "src",
+    "scripts",
+    "tests"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
