@@ -34,6 +34,18 @@ connector-impact-table-skill plan.md --format markdown --out impact.md
 connector-impact-table-skill plan.json --fail-on high
 ```
 
+Markdown plans may use plain bullets or structured, semicolon-separated fields.
+Put the connector in brackets and write each field as `name=value`:
+
+```markdown
+- [slack] action=post; target=#ops; sideEffect=send message; approval=required; rollback=delete message; dryRun=payload reviewed
+```
+
+Structured bullets support `id`, `connector`, `action`, `target`, `sideEffect`
+(also `side-effect` or `side_effect`), `approval`, `rollback`, and `dryRun`
+(also `dry-run` or `dry_run`). Values cannot contain semicolons. Omitted review
+fields remain `unspecified` so the report continues to flag missing evidence.
+
 ## Package Contents
 
 The npm package ships compiled CLI/source files, docs, examples, changelog, license, and the skill entrypoint. `npm run package:smoke` checks those contents after a build so the published package keeps the documented quickstart runnable.
