@@ -4,12 +4,17 @@ export function toJson(report: ImpactReport): string {
   return `${JSON.stringify(report, null, 2)}\n`;
 }
 
+function markdownCell(value: string): string {
+  return value.replace(/\|/g, '/').replace(/\r?\n|\r/g, ' ');
+}
+
 export function toMarkdown(report: ImpactReport): string {
   const lines = ['# Connector Impact Table', '', `Sources: ${report.sources.join(', ')}`, `Risk: low ${report.summary.low}, medium ${report.summary.medium}, high ${report.summary.high}`, ''];
   if (report.warnings.length) lines.push('## Warnings', '', ...report.warnings.map((warning) => `- ${warning}`), '');
   lines.push('| ID | Connector | Action | Target | Risk | Missing |', '| --- | --- | --- | --- | --- | --- |');
   for (const row of report.rows) {
-    lines.push(`| ${row.id} | ${row.connector} | ${row.action.replace(/\|/g, '/')} | ${row.target.replace(/\|/g, '/')} | ${row.risk} | ${row.missing.join(', ') || 'none'} |`);
+    const cells = [row.id, row.connector, row.action, row.target, row.risk, row.missing.join(', ') || 'none'];
+    lines.push(`| ${cells.map(markdownCell).join(' | ')} |`);
   }
   return `${lines.join('\n')}\n`;
 }

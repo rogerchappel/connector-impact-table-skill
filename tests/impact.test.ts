@@ -59,3 +59,27 @@ test('preserves structured markdown action fields', () => {
   assert.deepEqual(scoreAction(action).missing, []);
   assert.equal(scoreAction(action).risk, 'medium');
 });
+
+test('keeps Markdown table fields on a single six-column row', () => {
+  const markdown = toMarkdown({
+    sources: ['fixture.json'],
+    generatedAt: new Date(0).toISOString(),
+    rows: [{
+      id: 'row|injected\nid',
+      connector: 'slack|fake\nconnector',
+      action: 'post|message\naction',
+      target: '#ops|other\ntarget',
+      sideEffect: 'send',
+      approval: 'required',
+      rollback: 'delete',
+      dryRun: 'preview',
+      risk: 'high',
+      missing: ['approval|rollback\nfield']
+    }],
+    summary: { low: 0, medium: 0, high: 1 },
+    warnings: []
+  });
+
+  assert.match(markdown, /\| row\/injected id \| slack\/fake connector \| post\/message action \| #ops\/other target \| high \| approval\/rollback field \|/);
+  assert.equal(markdown.split('\n').filter((line) => line.startsWith('| ')).length, 3);
+});
