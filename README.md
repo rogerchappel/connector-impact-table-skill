@@ -34,6 +34,12 @@ connector-impact-table-skill plan.md --format markdown --out impact.md
 connector-impact-table-skill plan.json --fail-on high
 ```
 
+`--format` accepts `json` or `markdown`; `--fail-on` accepts `low`, `medium`, or
+`high`; and `--out` requires a destination path. Missing or unsupported option
+values and unknown options print a usage error to stderr and exit with status 2.
+When valid input meets the `--fail-on` threshold, the report is still rendered
+and the command exits with status 1.
+
 Markdown plans may use plain bullets or structured, semicolon-separated fields.
 Put the connector in brackets and write each field as `name=value`:
 
