@@ -16,6 +16,8 @@ try {
     "dist/src/cli.js",
     "dist/src/index.js",
     "dist/tests/impact.test.js",
+    "scripts/run-tests.js",
+    "tests/fixtures/actions-null.json",
     "README.md",
     "SKILL.md",
     "docs/VERIFICATION.md",
