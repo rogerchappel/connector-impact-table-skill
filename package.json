@@ -23,7 +23,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc --noEmit -p tsconfig.json",
-    "test": "node --test dist/tests/*.test.js",
+    "pretest": "npm run build",
+    "test": "node scripts/run-tests.js",
     "smoke": "npm run build && node dist/src/cli.js --help && node dist/src/cli.js examples/sample.txt --format markdown",
     "package:smoke": "node scripts/package-smoke.js",
     "validate": "bash scripts/validate.sh",

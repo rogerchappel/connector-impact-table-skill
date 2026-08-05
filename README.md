@@ -20,7 +20,6 @@ Run the same checks used for release-readiness before publishing or opening a re
 ```bash
 npm run check
 npm test
-npm run build
 npm run smoke
 npm run release:check
 npm pack --dry-run
@@ -37,6 +36,8 @@ connector-impact-table-skill plan.json --fail-on high
 `--format` accepts `json` or `markdown`; `--fail-on` accepts `low`, `medium`, or
 `high`; and `--out` requires a destination path. Missing or unsupported option
 values and unknown options print a usage error to stderr and exit with status 2.
+JSON input must be an array of actions or an object whose `actions` value is an
+array; other `actions` shapes produce the same concise usage-error response.
 When valid input meets the `--fail-on` threshold, the report is still rendered
 and the command exits with status 1.
 

@@ -40,6 +40,21 @@ test('rejects invalid, missing, and unknown CLI options with usage errors', () =
   }
 });
 
+test('rejects non-array JSON actions without a stack trace or report', () => {
+  for (const [shape, actions] of [
+    ['object', '{}'],
+    ['scalar', '42'],
+    ['null', 'null']
+  ]) {
+    const result = runCli([`tests/fixtures/actions-${shape}.json`]);
+    assert.equal(result.status, 2, `${shape}\n${result.stderr}`);
+    assert.equal(result.stdout, '');
+    assert.equal(result.stderr, 'Error: JSON plan "actions" must be an array\n' +
+      'Usage: connector-impact-table-skill <plan...> [--format json|markdown] [--out path] [--fail-on low|medium|high]\n');
+    assert.doesNotMatch(result.stderr, /(?:\n\s+at |PlanInputError:)/);
+  }
+});
+
 test('preserves structured markdown action fields', () => {
   const [action] = parsePlan(
     'sample.md',
