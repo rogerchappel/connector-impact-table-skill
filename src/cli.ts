@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { writeFile } from 'node:fs/promises';
-import { exceedsFailLevel, inspectPlans, toJson, toMarkdown, type RiskLevel } from './index.js';
+import { exceedsFailLevel, inspectPlans, PlanInputError, toJson, toMarkdown, type RiskLevel } from './index.js';
 
 function usage(): string {
   return `Usage: connector-impact-table-skill <plan...> [--format json|markdown] [--out path] [--fail-on low|medium|high]
@@ -51,8 +51,13 @@ for (let i = 0; i < args.length; i += 1) {
 
 if (!paths.length) usageError('at least one plan path is required');
 
-const report = await inspectPlans(paths, new Date(0).toISOString());
-const rendered = format === 'markdown' ? toMarkdown(report) : toJson(report);
-if (out) await writeFile(out, rendered, 'utf8');
-else process.stdout.write(rendered);
-if (failOn && exceedsFailLevel(report, failOn)) process.exit(1);
+try {
+  const report = await inspectPlans(paths, new Date(0).toISOString());
+  const rendered = format === 'markdown' ? toMarkdown(report) : toJson(report);
+  if (out) await writeFile(out, rendered, 'utf8');
+  else process.stdout.write(rendered);
+  if (failOn && exceedsFailLevel(report, failOn)) process.exit(1);
+} catch (error) {
+  if (error instanceof PlanInputError) usageError(error.message);
+  throw error;
+}

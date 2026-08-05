@@ -1,5 +1,12 @@
 import type { ConnectorAction } from './types.js';
 
+export class PlanInputError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PlanInputError';
+  }
+}
+
 function normalize(value: unknown): string {
   return typeof value === 'string' && value.trim() ? value.trim() : 'unspecified';
 }
@@ -12,8 +19,18 @@ export function parsePlan(source: string, text: string): ConnectorAction[] {
 }
 
 function parseJsonPlan(text: string): ConnectorAction[] {
-  const parsed = JSON.parse(text) as { actions?: unknown[] } | unknown[];
-  const actions = Array.isArray(parsed) ? parsed : parsed.actions ?? [];
+  const parsed: unknown = JSON.parse(text);
+  let actions: unknown;
+  if (Array.isArray(parsed)) actions = parsed;
+  else if (parsed !== null && typeof parsed === 'object') {
+    const record = parsed as Record<string, unknown>;
+    actions = Object.hasOwn(record, 'actions') ? record.actions : [];
+  }
+  else throw new PlanInputError('JSON plan must be an array or an object with an actions array');
+
+  if (!Array.isArray(actions)) {
+    throw new PlanInputError('JSON plan "actions" must be an array');
+  }
   return actions.map((item, index) => {
     const record = item && typeof item === 'object' ? item as Record<string, unknown> : {};
     return {
