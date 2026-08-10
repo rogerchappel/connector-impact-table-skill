@@ -19,7 +19,12 @@ export function parsePlan(source: string, text: string): ConnectorAction[] {
 }
 
 function parseJsonPlan(text: string): ConnectorAction[] {
-  const parsed: unknown = JSON.parse(text);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new PlanInputError('JSON plan is malformed');
+  }
   let actions: unknown;
   if (Array.isArray(parsed)) actions = parsed;
   else if (parsed !== null && typeof parsed === 'object') {
@@ -32,7 +37,10 @@ function parseJsonPlan(text: string): ConnectorAction[] {
     throw new PlanInputError('JSON plan "actions" must be an array');
   }
   return actions.map((item, index) => {
-    const record = item && typeof item === 'object' ? item as Record<string, unknown> : {};
+    if (item === null || typeof item !== 'object' || Array.isArray(item)) {
+      throw new PlanInputError(`JSON plan action at index ${index} must be an object`);
+    }
+    const record = item as Record<string, unknown>;
     return {
       id: normalize(record.id) === 'unspecified' ? `action-${index + 1}` : normalize(record.id),
       connector: normalize(record.connector),
