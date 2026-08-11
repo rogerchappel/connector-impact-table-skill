@@ -37,7 +37,9 @@ connector-impact-table-skill plan.json --fail-on high
 `high`; and `--out` requires a destination path. Missing or unsupported option
 values and unknown options print a usage error to stderr and exit with status 2.
 JSON input must be an array of actions or an object whose `actions` value is an
-array; other `actions` shapes produce the same concise usage-error response.
+array. Each array entry must be an object; scalar, `null`, and array entries are
+rejected with their zero-based index. Other `actions` shapes and malformed JSON
+produce a concise usage-error response without a stack trace.
 When valid input meets the `--fail-on` threshold, the report is still rendered
 and the command exits with status 1.
 
