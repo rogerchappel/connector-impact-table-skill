@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, relative, resolve } from 'node:path';
 import { inspectPlans, parsePlan, PlanInputError, scoreAction, toMarkdown } from '../src/index.js';
 
 function runCli(args: string[]) {
@@ -37,6 +40,42 @@ test('rejects invalid, missing, and unknown CLI options with usage errors', () =
     assert.equal(result.status, 2, `${args.join(' ')}\n${result.stderr}`);
     assert.match(result.stderr, /^Error: .+\nUsage: /);
     assert.equal(result.stdout, '');
+  }
+});
+
+test('rejects output paths that resolve to an input without changing the input', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-impact-table-'));
+  const plan = join(directory, 'plan.json');
+  const contents = Buffer.from('[{"action":"send","connector":"slack"}]\n');
+  writeFileSync(plan, contents);
+
+  try {
+    for (const output of [plan, relative(process.cwd(), resolve(directory, '.', 'plan.json'))]) {
+      const result = runCli([plan, '--out', output]);
+      assert.equal(result.status, 2, result.stderr);
+      assert.match(result.stderr, /^Error: --out must not resolve to an input plan path\nUsage: /);
+      assert.equal(result.stdout, '');
+      assert.deepEqual(readFileSync(plan), contents);
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('writes reports when the output path is distinct from every input', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-impact-table-'));
+  const plan = join(directory, 'plan.json');
+  const output = join(directory, 'report.md');
+  writeFileSync(plan, '[{"action":"send","connector":"slack"}]\n');
+
+  try {
+    const result = runCli([plan, '--format', 'markdown', '--out', output]);
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stderr, '');
+    assert.equal(result.stdout, '');
+    assert.match(readFileSync(output, 'utf8'), /^# Connector Impact Table/m);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
   }
 });
 

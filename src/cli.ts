@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { exceedsFailLevel, inspectPlans, PlanInputError, toJson, toMarkdown, type RiskLevel } from './index.js';
 
 function usage(): string {
@@ -50,6 +51,9 @@ for (let i = 0; i < args.length; i += 1) {
 }
 
 if (!paths.length) usageError('at least one plan path is required');
+if (out && paths.some((path) => resolve(path) === resolve(out))) {
+  usageError('--out must not resolve to an input plan path');
+}
 
 try {
   const report = await inspectPlans(paths, new Date(0).toISOString());
