@@ -36,6 +36,9 @@ connector-impact-table-skill plan.json --fail-on high
 `--format` accepts `json` or `markdown`; `--fail-on` accepts `low`, `medium`, or
 `high`; and `--out` requires a destination path. Missing or unsupported option
 values and unknown options print a usage error to stderr and exit with status 2.
+The destination must not resolve to any input plan path; direct matches and
+normalized relative or absolute aliases are rejected before any file is read or
+written.
 JSON input must be an array of actions or an object whose `actions` value is an
 array. Each array entry must be an object; scalar, `null`, and array entries are
 rejected with their zero-based index. Other `actions` shapes and malformed JSON
