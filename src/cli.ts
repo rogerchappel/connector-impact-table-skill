@@ -34,6 +34,13 @@ function usageError(message: string): never {
   process.exit(2);
 }
 
+function ioError(operation: 'read plan' | 'write report', path: string, error: unknown): never {
+  const code = typeof error === 'object' && error !== null && 'code' in error &&
+    typeof error.code === 'string' ? ` (${error.code})` : '';
+  process.stderr.write(`Error: unable to ${operation} "${path}"${code}\n`);
+  process.exit(2);
+}
+
 for (let i = 0; i < args.length; i += 1) {
   const arg = args[i];
   if (arg === '--format') {
@@ -56,10 +63,24 @@ if (out && paths.some((path) => resolve(path) === resolve(out))) {
 }
 
 try {
-  const report = await inspectPlans(paths, new Date(0).toISOString());
+  let report;
+  try {
+    report = await inspectPlans(paths, new Date(0).toISOString());
+  } catch (error) {
+    if (error instanceof PlanInputError) throw error;
+    const failedPath = typeof error === 'object' && error !== null && 'path' in error &&
+      typeof error.path === 'string' ? error.path : paths[0];
+    ioError('read plan', failedPath, error);
+  }
+
   const rendered = format === 'markdown' ? toMarkdown(report) : toJson(report);
-  if (out) await writeFile(out, rendered, 'utf8');
-  else process.stdout.write(rendered);
+  if (out) {
+    try {
+      await writeFile(out, rendered, 'utf8');
+    } catch (error) {
+      ioError('write report', out, error);
+    }
+  } else process.stdout.write(rendered);
   if (failOn && exceedsFailLevel(report, failOn)) process.exit(1);
 } catch (error) {
   if (error instanceof PlanInputError) usageError(error.message);
