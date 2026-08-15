@@ -39,6 +39,9 @@ values and unknown options print a usage error to stderr and exit with status 2.
 The destination must not resolve to any input plan path; direct matches and
 normalized relative or absolute aliases are rejected before any file is read or
 written.
+Unreadable input plans and output destinations that cannot be written print a
+single path-specific filesystem diagnostic to stderr, produce no report or stack
+trace, and exit with status 2. Parent directories for `--out` are not created.
 JSON input must be an array of actions or an object whose `actions` value is an
 array. Each array entry must be an object; scalar, `null`, and array entries are
 rejected with their zero-based index. Other `actions` shapes and malformed JSON
