@@ -79,6 +79,33 @@ test('writes reports when the output path is distinct from every input', () => {
   }
 });
 
+test('reports unreadable input files without a stack trace or partial report', () => {
+  const missing = join(tmpdir(), 'connector-impact-table-missing-plan.json');
+  rmSync(missing, { force: true });
+
+  const result = runCli([missing]);
+  assert.equal(result.status, 2);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr, `Error: unable to read plan "${missing}" (ENOENT)\n`);
+  assert.doesNotMatch(result.stderr, /(?:\n\s+at |Error: ENOENT)/);
+});
+
+test('reports unwritable output paths without a stack trace or partial report', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-impact-table-'));
+  const output = join(directory, 'missing-parent', 'report.md');
+
+  try {
+    const result = runCli(['examples/plan.json', '--out', output]);
+    assert.equal(result.status, 2);
+    assert.equal(result.stdout, '');
+    assert.equal(result.stderr, `Error: unable to write report "${output}" (ENOENT)\n`);
+    assert.doesNotMatch(result.stderr, /(?:\n\s+at |Error: ENOENT)/);
+    assert.throws(() => readFileSync(output), { code: 'ENOENT' });
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test('rejects non-array JSON actions without a stack trace or report', () => {
   for (const [shape, actions] of [
     ['object', '{}'],
