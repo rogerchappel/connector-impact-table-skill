@@ -121,6 +121,31 @@ test('rejects non-array JSON actions without a stack trace or report', () => {
   }
 });
 
+test('rejects JSON objects without an actions property', () => {
+  assert.throws(
+    () => parsePlan('missing-actions.json', '{"name":"release plan"}'),
+    (error: unknown) => error instanceof PlanInputError &&
+      error.message === 'JSON plan object must have an "actions" property'
+  );
+});
+
+test('reports a missing JSON actions property as a concise CLI usage error with no report', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-impact-table-'));
+  const plan = join(directory, 'missing-actions.json');
+  writeFileSync(plan, '{"name":"release plan"}\n');
+
+  try {
+    const result = runCli([plan]);
+    assert.equal(result.status, 2);
+    assert.equal(result.stdout, '');
+    assert.equal(result.stderr, 'Error: JSON plan object must have an "actions" property\n' +
+      'Usage: connector-impact-table-skill <plan...> [--format json|markdown] [--out path] [--fail-on low|medium|high]\n');
+    assert.doesNotMatch(result.stderr, /(?:\n\s+at |PlanInputError:)/);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test('rejects non-object JSON action entries with their zero-based index', () => {
   for (const [plan, index] of [
     ['[null]', 0],
@@ -151,6 +176,8 @@ test('reports invalid JSON entries and malformed JSON as concise CLI usage error
 test('preserves valid array and object plans', () => {
   assert.equal(parsePlan('array.json', '[{"action":"send"}]')[0].action, 'send');
   assert.equal(parsePlan('object.json', '{"actions":[{"action":"send"}]}')[0].action, 'send');
+  assert.deepEqual(parsePlan('empty-array.json', '[]'), []);
+  assert.deepEqual(parsePlan('empty-object.json', '{"actions":[]}'), []);
 });
 
 test('renders valid reports before applying the fail-on exit status', () => {
