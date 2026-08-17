@@ -29,7 +29,10 @@ function parseJsonPlan(text: string): ConnectorAction[] {
   if (Array.isArray(parsed)) actions = parsed;
   else if (parsed !== null && typeof parsed === 'object') {
     const record = parsed as Record<string, unknown>;
-    actions = Object.hasOwn(record, 'actions') ? record.actions : [];
+    if (!Object.hasOwn(record, 'actions')) {
+      throw new PlanInputError('JSON plan object must have an "actions" property');
+    }
+    actions = record.actions;
   }
   else throw new PlanInputError('JSON plan must be an array or an object with an actions array');
 

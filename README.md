@@ -43,9 +43,11 @@ Unreadable input plans and output destinations that cannot be written print a
 single path-specific filesystem diagnostic to stderr, produce no report or stack
 trace, and exit with status 2. Parent directories for `--out` are not created.
 JSON input must be an array of actions or an object whose `actions` value is an
-array. Each array entry must be an object; scalar, `null`, and array entries are
-rejected with their zero-based index. Other `actions` shapes and malformed JSON
-produce a concise usage-error response without a stack trace.
+array; the property is required for object input, while an explicitly empty
+`actions` array is valid. Each array entry must be an object; scalar, `null`, and
+array entries are rejected with their zero-based index. Missing `actions`, other
+`actions` shapes, and malformed JSON produce a concise usage-error response
+without a stack trace.
 When valid input meets the `--fail-on` threshold, the report is still rendered
 and the command exits with status 1.
 
