@@ -27,6 +27,41 @@ test('parses markdown action bullets', () => {
   assert.equal(actions[0].connector.toLowerCase(), 'slack');
 });
 
+test('assigns unique deterministic ids across multiple plans', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-impact-table-'));
+  const first = join(directory, 'first.md');
+  const second = join(directory, 'second.md');
+  writeFileSync(first, '- [slack] action=post; target=a\n');
+  writeFileSync(second, '- [github] action=comment; target=b\n');
+
+  try {
+    const report = await inspectPlans([first, second]);
+    assert.deepEqual(report.rows.map((row) => row.id), ['first-md-1', 'second-md-1']);
+    assert.ok(report.warnings.some((warning) => warning.startsWith('first-md-1 ')));
+    assert.ok(report.warnings.some((warning) => warning.startsWith('second-md-1 ')));
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('preserves explicit ids and disambiguates collisions deterministically', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-impact-table-'));
+  const generated = join(directory, 'plan.md');
+  const explicit = join(directory, 'explicit.json');
+  writeFileSync(generated, '- [slack] action=post; target=a\n');
+  writeFileSync(explicit, JSON.stringify({ actions: [
+    { id: 'plan-md-1', connector: 'github' },
+    { id: 'plan-md-1', connector: 'jira' }
+  ] }));
+
+  try {
+    const report = await inspectPlans([generated, explicit]);
+    assert.deepEqual(report.rows.map((row) => row.id), ['plan-md-1-2', 'plan-md-1', 'plan-md-1-3']);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test('rejects invalid, missing, and unknown CLI options with usage errors', () => {
   for (const args of [
     ['examples/plan.json', '--format', 'xml'],
