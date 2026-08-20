@@ -12,13 +12,22 @@ function normalize(value: unknown): string {
 }
 
 export function parsePlan(source: string, text: string): ConnectorAction[] {
+  return parsePlanEntries(source, text).map(({ action }) => action);
+}
+
+export interface ParsedPlanEntry {
+  action: ConnectorAction;
+  explicitId: boolean;
+}
+
+export function parsePlanEntries(source: string, text: string): ParsedPlanEntry[] {
   const trimmed = text.trim();
   if (!trimmed) return [];
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) return parseJsonPlan(trimmed);
   return parseMarkdownPlan(source, text);
 }
 
-function parseJsonPlan(text: string): ConnectorAction[] {
+function parseJsonPlan(text: string): ParsedPlanEntry[] {
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
@@ -44,7 +53,7 @@ function parseJsonPlan(text: string): ConnectorAction[] {
       throw new PlanInputError(`JSON plan action at index ${index} must be an object`);
     }
     const record = item as Record<string, unknown>;
-    return {
+    return { explicitId: normalize(record.id) !== 'unspecified', action: {
       id: normalize(record.id) === 'unspecified' ? `action-${index + 1}` : normalize(record.id),
       connector: normalize(record.connector),
       action: normalize(record.action),
@@ -53,7 +62,7 @@ function parseJsonPlan(text: string): ConnectorAction[] {
       approval: normalize(record.approval),
       rollback: normalize(record.rollback),
       dryRun: normalize(record.dryRun ?? record.dry_run)
-    };
+    } };
   });
 }
 
@@ -67,7 +76,7 @@ function parseMarkdownFields(body: string): Record<string, string> {
   return fields;
 }
 
-function parseMarkdownPlan(source: string, text: string): ConnectorAction[] {
+function parseMarkdownPlan(source: string, text: string): ParsedPlanEntry[] {
   return text.split(/\r?\n/).map((line) => line.trim()).filter((line) => /^[-*]\s+/.test(line)).map((line, index) => {
     const body = line.replace(/^[-*]\s+/, '');
     const fields = parseMarkdownFields(body.replace(/^\s*\[[^\]]+\]\s*/, ''));
@@ -77,7 +86,7 @@ function parseMarkdownPlan(source: string, text: string): ConnectorAction[] {
       ?? 'unspecified';
     const action = fields.action ?? body;
     const target = fields.target ?? body.match(/(?:to|in|on)\s+([^.;]+)/i)?.[1]?.trim() ?? source;
-    return {
+    return { explicitId: fields.id !== undefined, action: {
       id: fields.id ?? `md-${index + 1}`,
       connector,
       action,
@@ -86,6 +95,6 @@ function parseMarkdownPlan(source: string, text: string): ConnectorAction[] {
       approval: fields.approval ?? 'unspecified',
       rollback: fields.rollback ?? 'unspecified',
       dryRun: fields.dryrun ?? 'unspecified'
-    };
+    } };
   });
 }
