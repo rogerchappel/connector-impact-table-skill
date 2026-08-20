@@ -33,6 +33,14 @@ connector-impact-table-skill plan.md --format markdown --out impact.md
 connector-impact-table-skill plan.json --fail-on high
 ```
 
+You can pass multiple plans in one invocation. Generated action IDs include the
+input filename stem (for example, `rollout-md-1` or `rollout-action-1`) so rows
+and warnings remain unambiguous across files. Explicit `id` values are kept;
+when an explicit ID is repeated, later occurrences receive `-2`, `-3`, and so
+on. If a generated ID matches any explicit ID, the explicit ID takes precedence
+and the generated ID receives the next available suffix. This collision policy
+is deterministic for a given ordered list of inputs.
+
 `--format` accepts `json` or `markdown`; `--fail-on` accepts `low`, `medium`, or
 `high`; and `--out` requires a destination path. Missing or unsupported option
 values and unknown options print a usage error to stderr and exit with status 2.
