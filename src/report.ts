@@ -4,13 +4,21 @@ export function toJson(report: ImpactReport): string {
   return `${JSON.stringify(report, null, 2)}\n`;
 }
 
+function markdownText(value: string): string {
+  return value
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/([\\`*_{}\[\]()<>#+.!|\-])/g, '\\$1');
+}
+
 function markdownCell(value: string): string {
-  return value.replace(/\|/g, '/').replace(/\r?\n|\r/g, ' ');
+  return value.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\|/g, '/');
 }
 
 export function toMarkdown(report: ImpactReport): string {
-  const lines = ['# Connector Impact Table', '', `Sources: ${report.sources.join(', ')}`, `Risk: low ${report.summary.low}, medium ${report.summary.medium}, high ${report.summary.high}`, ''];
-  if (report.warnings.length) lines.push('## Warnings', '', ...report.warnings.map((warning) => `- ${warning}`), '');
+  const lines = ['# Connector Impact Table', '', `Sources: ${report.sources.map(markdownText).join(', ')}`, `Risk: low ${report.summary.low}, medium ${report.summary.medium}, high ${report.summary.high}`, ''];
+  if (report.warnings.length) lines.push('## Warnings', '', ...report.warnings.map((warning) => `- ${markdownText(warning)}`), '');
   lines.push('| ID | Connector | Action | Target | Risk | Missing |', '| --- | --- | --- | --- | --- | --- |');
   for (const row of report.rows) {
     const cells = [row.id, row.connector, row.action, row.target, row.risk, row.missing.join(', ') || 'none'];
