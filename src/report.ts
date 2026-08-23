@@ -13,7 +13,7 @@ function markdownText(value: string): string {
 }
 
 function markdownCell(value: string): string {
-  return value.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\|/g, '/');
+  return markdownText(value);
 }
 
 export function toMarkdown(report: ImpactReport): string {

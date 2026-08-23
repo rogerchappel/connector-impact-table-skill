@@ -38,6 +38,7 @@ test('keeps user-controlled source labels and warning ids inside markdown text',
   assert.ok(markdown.includes('Sources: plans/ops \\#\\# injected \\[link\\]\\(https://example\\.test\\)\\.json'));
   assert.match(markdown, /- row\\-1 \\- injected \\`code\\` missing approval, rollback, dryRun/);
   assert.doesNotMatch(markdown, /^(?:## injected|- injected|> quote)$/m);
+  assert.ok(markdown.includes('| row\\-1 \\- injected \\`code\\` | slack\\|chat | post \\> quote | \\#ops\\|alerts | medium | approval, rollback, dryRun |'));
   const tableRows = markdown.split('\n').filter((line) => line.startsWith('| '));
   assert.equal(tableRows.length, 3);
   assert.ok(tableRows.every((line) => line.split(/(?<!\\)\|/).length === 8));
@@ -285,6 +286,6 @@ test('keeps Markdown table fields on a single six-column row', () => {
     warnings: []
   });
 
-  assert.match(markdown, /\| row\/injected id \| slack\/fake connector \| post\/message action \| #ops\/other target \| high \| approval\/rollback field \|/);
+  assert.ok(markdown.includes('| row\\|injected id | slack\\|fake connector | post\\|message action | \\#ops\\|other target | high | approval\\|rollback field |'));
   assert.equal(markdown.split('\n').filter((line) => line.startsWith('| ')).length, 3);
 });
