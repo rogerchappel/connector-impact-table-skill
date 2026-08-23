@@ -21,6 +21,28 @@ test('scores connector actions and reports missing approval', async () => {
   assert.match(toMarkdown(report), /Connector Impact Table/);
 });
 
+test('keeps user-controlled source labels and warning ids inside markdown text', () => {
+  const report = {
+    sources: ['plans/ops\n## injected [link](https://example.test).json'],
+    generatedAt: '1970-01-01T00:00:00.000Z',
+    rows: [scoreAction({
+      id: 'row-1\r\n- injected `code`', connector: 'slack|chat',
+      action: 'post\n> quote', target: '#ops|alerts', sideEffect: 'post',
+      approval: 'unspecified', rollback: 'unspecified', dryRun: 'unspecified'
+    })],
+    summary: { low: 0, medium: 1, high: 0 },
+    warnings: ['row-1\r\n- injected `code` missing approval, rollback, dryRun']
+  };
+
+  const markdown = toMarkdown(report);
+  assert.ok(markdown.includes('Sources: plans/ops \\#\\# injected \\[link\\]\\(https://example\\.test\\)\\.json'));
+  assert.match(markdown, /- row\\-1 \\- injected \\`code\\` missing approval, rollback, dryRun/);
+  assert.doesNotMatch(markdown, /^(?:## injected|- injected|> quote)$/m);
+  const tableRows = markdown.split('\n').filter((line) => line.startsWith('| '));
+  assert.equal(tableRows.length, 3);
+  assert.ok(tableRows.every((line) => line.split(/(?<!\\)\|/).length === 8));
+});
+
 test('parses markdown action bullets', () => {
   const actions = parsePlan('sample.txt', '- Send Slack message to #ops');
   assert.equal(actions.length, 1);
