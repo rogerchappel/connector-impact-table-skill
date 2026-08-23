@@ -59,6 +59,13 @@ without a stack trace.
 When valid input meets the `--fail-on` threshold, the report is still rendered
 and the command exits with status 1.
 
+Markdown output collapses line breaks and repeated whitespace in source labels,
+action fields, IDs, and warnings, then escapes Markdown control punctuation.
+User-controlled values therefore remain readable text inside the Sources line,
+warning list items, and six-column table rows instead of creating headings,
+lists, links, code blocks, quotes, or additional table cells. JSON output keeps
+the original normalized input values.
+
 Markdown plans may use plain bullets or structured, semicolon-separated fields.
 Put the connector in brackets and write each field as `name=value`:
 
@@ -93,7 +100,9 @@ review artifact before collecting approval for live connector actions.
 ## Limitations
 
 Risk scoring is intentionally conservative and keyword-based. It does not replace
-human approval or connector-level permission enforcement.
+human approval or connector-level permission enforcement. Markdown escaping is
+intended to preserve report structure, not to sanitize HTML for a renderer that
+allows raw HTML from surrounding trusted report content.
 
 ## Release notes
 
