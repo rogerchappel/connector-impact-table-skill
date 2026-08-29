@@ -48,6 +48,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
     "@types/node": "^26.1.1",
     "typescript": "^5.5.4"
