@@ -266,6 +266,17 @@ test('preserves structured markdown action fields', () => {
   assert.equal(scoreAction(action).risk, 'medium');
 });
 
+test('rejects malformed non-empty structured markdown field segments', () => {
+  for (const segment of ['missing equals', 'action=']) {
+    assert.throws(
+      () => parsePlan('sample.md', `- [slack] action=post; ${segment}`),
+      (error: unknown) => error instanceof PlanInputError &&
+        error.message === `Markdown structured field segment is malformed: "${segment}"`
+    );
+  }
+  assert.equal(parsePlan('sample.md', '- [slack] action=post; ; approval=required')[0].approval, 'required');
+});
+
 test('keeps Markdown table fields on a single six-column row', () => {
   const markdown = toMarkdown({
     sources: ['fixture.json'],
