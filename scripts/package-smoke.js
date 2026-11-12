@@ -6,11 +6,11 @@ import { execFileSync } from "node:child_process";
 const outDir = mkdtempSync(join(tmpdir(), "connector-impact-pack-"));
 
 try {
-  const packOutput = execFileSync("npm", ["pack", "--json", "--pack-destination", outDir], {
+  const packOutput = execFileSync("npm", ["pack", "--dry-run", "--json"], {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
   });
-  const [{ filename, files }] = JSON.parse(packOutput);
+  const [{ files }] = JSON.parse(packOutput);
   const names = new Set(files.map((file) => file.path));
   const required = [
     "dist/src/cli.js",
@@ -41,7 +41,19 @@ try {
     throw new Error(`package files allowlist has duplicates: ${duplicateFiles.join(", ")}`);
   }
 
-  console.log(`package smoke passed: ${filename}`);
+  const packageName = packageJson.name.replace(/^@/, "").replaceAll("/", "-");
+  const cliTarget = packageJson.bin?.[packageName];
+  if (typeof cliTarget !== "string" || !names.has(cliTarget.replace(/^\.\//, ""))) {
+    throw new Error(`npm pack is missing declared CLI target: ${cliTarget ?? "(no CLI target declared)"}`);
+  }
+
+  const forbidden = [".github/workflows/ci.yml", "tsconfig.json", "package-lock.json"];
+  const includedForbidden = forbidden.filter((file) => names.has(file));
+  if (includedForbidden.length > 0) {
+    throw new Error(`npm pack includes development-only files: ${includedForbidden.join(", ")}`);
+  }
+
+  console.log("package smoke passed: dry-run archive contents verified");
 } finally {
   rmSync(outDir, { recursive: true, force: true });
 }
