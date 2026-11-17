@@ -3,6 +3,10 @@
 Prepare a deterministic impact table for planned connector actions before an
 agent touches external accounts.
 
+## Supported runtimes
+
+Node.js 20, 22, 23, and 24 are tested in CI. The package engine range is `>=20 <25`; Node.js 25 and newer are not yet declared compatible.
+
 ## Quickstart
 
 ```bash
