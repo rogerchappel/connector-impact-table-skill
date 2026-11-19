@@ -45,7 +45,7 @@ on. If a generated ID matches any explicit ID, the explicit ID takes precedence
 and the generated ID receives the next available suffix. This collision policy
 is deterministic for a given ordered list of inputs.
 
-`--format` accepts `json` or `markdown`; `--fail-on` accepts `low`, `medium`, or
+`--format` accepts `json`, `markdown`, or `sarif`. SARIF output uses version 2.1.0 and maps low, medium, and high risk to note, warning, and error respectively. `--fail-on` accepts `low`, `medium`, or
 `high`; and `--out` requires a destination path. Missing or unsupported option
 values and unknown options print a usage error to stderr and exit with status 2.
 The destination must not resolve to any input plan path; direct matches and

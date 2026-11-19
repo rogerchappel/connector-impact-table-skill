@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { exceedsFailLevel, inspectPlans, PlanInputError, toJson, toMarkdown, type RiskLevel } from './index.js';
+import { exceedsFailLevel, inspectPlans, PlanInputError, toJson, toMarkdown, toSarif, type RiskLevel } from './index.js';
 
 function usage(): string {
-  return `Usage: connector-impact-table-skill <plan...> [--format json|markdown] [--out path] [--fail-on low|medium|high]
+  return `Usage: connector-impact-table-skill <plan...> [--format json|markdown|sarif] [--out path] [--fail-on low|medium|high]
 `;
 }
 
@@ -14,7 +14,7 @@ if ((args.length === 1 && args[0] === '--help') || args.length === 0) {
   process.exit(0);
 }
 
-let format: 'json' | 'markdown' = 'json';
+let format: 'json' | 'markdown' | 'sarif' = 'json';
 let out: string | undefined;
 let failOn: RiskLevel | undefined;
 const paths: string[] = [];
@@ -45,7 +45,7 @@ for (let i = 0; i < args.length; i += 1) {
   const arg = args[i];
   if (arg === '--format') {
     const value = optionValue(arg, i++);
-    if (value !== 'json' && value !== 'markdown') usageError(`invalid --format value: ${value}`);
+    if (value !== 'json' && value !== 'markdown' && value !== 'sarif') usageError(`invalid --format value: ${value}`);
     format = value;
   } else if (arg === '--out') {
     out = optionValue(arg, i++);
@@ -73,7 +73,7 @@ try {
     ioError('read plan', failedPath, error);
   }
 
-  const rendered = format === 'markdown' ? toMarkdown(report) : toJson(report);
+  const rendered = format === 'markdown' ? toMarkdown(report) : format === 'sarif' ? toSarif(report) : toJson(report);
   if (out) {
     try {
       await writeFile(out, rendered, 'utf8');

@@ -26,5 +26,5 @@ export async function inspectPlans(paths: string[], now = '1970-01-01T00:00:00.0
 
 export { parsePlan, PlanInputError } from './parser.js';
 export { scoreAction, buildImpactReport } from './impact.js';
-export { toJson, toMarkdown, exceedsFailLevel } from './report.js';
+export { toJson, toMarkdown, toSarif, exceedsFailLevel } from './report.js';
 export type { ConnectorAction, ImpactReport, ImpactRow, RiskLevel } from './types.js';
