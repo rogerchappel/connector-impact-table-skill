@@ -1,5 +1,22 @@
 import type { ImpactReport, RiskLevel } from './types.js';
 
+export function toSarif(report: ImpactReport): string {
+  const rules = [...new Set(report.rows.map((row) => row.id))].map((id) => ({
+    id,
+    shortDescription: { text: `Connector impact: ${id}` },
+  }));
+  const results = report.rows.map((row) => ({
+    ruleId: row.id,
+    level: row.risk === 'high' ? 'error' : row.risk === 'medium' ? 'warning' : 'note',
+    message: { text: `${row.connector} ${row.action} on ${row.target}; missing: ${row.missing.join(', ') || 'none'}` },
+  }));
+  return `${JSON.stringify({
+    $schema: 'https://json.schemastore.org/sarif-2.1.0.json',
+    version: '2.1.0',
+    runs: [{ tool: { driver: { name: 'connector-impact-table-skill', rules } }, results }],
+  }, null, 2)}\n`;
+}
+
 export function toJson(report: ImpactReport): string {
   return `${JSON.stringify(report, null, 2)}\n`;
 }
