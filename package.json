@@ -49,7 +49,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20 <25"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
