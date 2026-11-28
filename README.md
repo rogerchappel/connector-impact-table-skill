@@ -77,6 +77,9 @@ Structured bullets support `id`, `connector`, `action`, `target`, `sideEffect`
 (also `side-effect` or `side_effect`), `approval`, `rollback`, and `dryRun`
 (also `dry-run` or `dry_run`). Values cannot contain semicolons. Omitted review
 fields remain `unspecified` so the report continues to flag missing evidence.
+Empty segments (for example, an extra semicolon) are ignored; any non-empty
+segment that is not a valid `name=value` field rejects the plan with a clear
+input diagnostic rather than silently dropping content.
 
 ## Package Contents
 
