@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative, resolve } from 'node:path';
-import { inspectPlans, parsePlan, PlanInputError, scoreAction, toMarkdown } from '../src/index.js';
+import { inspectPlans, parsePlan, PlanInputError, scoreAction, toJson, toMarkdown } from '../src/index.js';
 
 function runCli(args: string[]) {
   return spawnSync(process.execPath, ['dist/src/cli.js', ...args], {
@@ -80,6 +80,30 @@ test('preserves explicit ids and disambiguates collisions deterministically', as
   try {
     const report = await inspectPlans([generated, explicit]);
     assert.deepEqual(report.rows.map((row) => row.id), ['plan-md-1-2', 'plan-md-1', 'plan-md-1-3']);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('keeps generated ids distinct from colliding explicit ids independent of input order', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-impact-table-'));
+  const generated = join(directory, 'plan.md');
+  const explicit = join(directory, 'explicit.json');
+  writeFileSync(generated, '- [slack] action=post; target=a\n');
+  writeFileSync(explicit, JSON.stringify({ actions: [{ id: 'plan-md-1', connector: 'github' }] }));
+
+  try {
+    for (const paths of [[generated, explicit], [explicit, generated]]) {
+      const first = await inspectPlans(paths);
+      const second = await inspectPlans(paths);
+      const generatedFirst = paths[0] === generated;
+      assert.deepEqual(first.rows.map((row) => row.id), generatedFirst
+        ? ['plan-md-1-2', 'plan-md-1'] : ['plan-md-1', 'plan-md-1-2']);
+      assert.equal(toJson(first), toJson(second));
+      const result = runCli([...paths, '--format', 'json']);
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(result.stdout, toJson(first));
+    }
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
