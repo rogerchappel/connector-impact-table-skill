@@ -34,3 +34,6 @@ jobs:
 
       - name: Run release checks
         run: npm run release:check
+
+      - name: Verify packed artifact contents
+        run: npm run package:smoke
