@@ -174,7 +174,7 @@ test('rejects non-array JSON actions without a stack trace or report', () => {
     assert.equal(result.status, 2, `${shape}\n${result.stderr}`);
     assert.equal(result.stdout, '');
     assert.equal(result.stderr, 'Error: JSON plan "actions" must be an array\n' +
-      'Usage: connector-impact-table-skill <plan...> [--format json|markdown] [--out path] [--fail-on low|medium|high]\n');
+      'Usage: connector-impact-table-skill <plan...> [--format json|markdown|sarif] [--out path] [--fail-on low|medium|high]\n');
     assert.doesNotMatch(result.stderr, /(?:\n\s+at |PlanInputError:)/);
   }
 });
@@ -197,7 +197,7 @@ test('reports a missing JSON actions property as a concise CLI usage error with 
     assert.equal(result.status, 2);
     assert.equal(result.stdout, '');
     assert.equal(result.stderr, 'Error: JSON plan object must have an "actions" property\n' +
-      'Usage: connector-impact-table-skill <plan...> [--format json|markdown] [--out path] [--fail-on low|medium|high]\n');
+      'Usage: connector-impact-table-skill <plan...> [--format json|markdown|sarif] [--out path] [--fail-on low|medium|high]\n');
     assert.doesNotMatch(result.stderr, /(?:\n\s+at |PlanInputError:)/);
   } finally {
     rmSync(directory, { recursive: true, force: true });
@@ -299,4 +299,22 @@ test('keeps Markdown table fields on a single six-column row', () => {
 
   assert.ok(markdown.includes('| row\\|injected id | slack\\|fake connector | post\\|message action | \\#ops\\|other target | high | approval\\|rollback field |'));
   assert.equal(markdown.split('\n').filter((line) => line.startsWith('| ')).length, 3);
+});
+
+test('renders SARIF 2.1.0 with mapped risk levels', async () => {
+  const { toSarif } = await import('../src/report.js');
+  const report = {
+    sources: ['fixture.json'], generatedAt: new Date(0).toISOString(),
+    rows: (['low', 'medium', 'high'] as const).map((risk, index) => ({
+      id: `rule-${index}`, connector: 'slack', action: 'post', target: '#ops',
+      sideEffect: 'send', risk, missing: [],
+    })),
+    summary: { low: 1, medium: 1, high: 1 }, warnings: [],
+  };
+  const sarif = JSON.parse(toSarif(report));
+  assert.equal(sarif.version, '2.1.0');
+  assert.equal(sarif.$schema, 'https://json.schemastore.org/sarif-2.1.0.json');
+  assert.equal(sarif.runs[0].tool.driver.name, 'connector-impact-table-skill');
+  assert.deepEqual(sarif.runs[0].results.map((result: { level: string }) => result.level), ['note', 'warning', 'error']);
+  assert.deepEqual(sarif.runs[0].results.map((result: { ruleId: string }) => result.ruleId), ['rule-0', 'rule-1', 'rule-2']);
 });
