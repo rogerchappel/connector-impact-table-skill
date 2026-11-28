@@ -69,8 +69,10 @@ function parseJsonPlan(text: string): ParsedPlanEntry[] {
 function parseMarkdownFields(body: string): Record<string, string> {
   const fields: Record<string, string> = {};
   for (const segment of body.split(';')) {
-    const match = segment.trim().match(/^([a-z][a-z_-]*)\s*=\s*(.+)$/i);
-    if (!match) continue;
+    const trimmed = segment.trim();
+    if (!trimmed) continue;
+    const match = trimmed.match(/^([a-z][a-z_-]*)\s*=\s*(.+)$/i);
+    if (!match) throw new PlanInputError(`Markdown structured field segment is malformed: "${trimmed}"`);
     fields[match[1].toLowerCase().replace(/[-_]/g, '')] = match[2].trim();
   }
   return fields;
@@ -79,7 +81,8 @@ function parseMarkdownFields(body: string): Record<string, string> {
 function parseMarkdownPlan(source: string, text: string): ParsedPlanEntry[] {
   return text.split(/\r?\n/).map((line) => line.trim()).filter((line) => /^[-*]\s+/.test(line)).map((line, index) => {
     const body = line.replace(/^[-*]\s+/, '');
-    const fields = parseMarkdownFields(body.replace(/^\s*\[[^\]]+\]\s*/, ''));
+    const structuredBody = body.replace(/^\s*\[[^\]]+\]\s*/, '');
+    const fields = structuredBody.includes('=') ? parseMarkdownFields(structuredBody) : {};
     const connector = body.match(/^\s*\[([^\]]+)\]/)?.[1]?.trim()
       ?? fields.connector
       ?? body.match(new RegExp('\\b(slack|github|calendar|crm|notion|jira|linear)\\b', 'i'))?.[1]
