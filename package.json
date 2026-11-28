@@ -28,7 +28,8 @@
     "smoke": "npm run build && node dist/src/cli.js --help && node dist/src/cli.js examples/sample.txt --format markdown",
     "package:smoke": "npm run build && node scripts/package-smoke.js",
     "validate": "bash scripts/validate.sh",
-    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
+    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke",
+    "prepublishOnly": "npm run release:check"
   },
   "keywords": [
     "agent-skill",
